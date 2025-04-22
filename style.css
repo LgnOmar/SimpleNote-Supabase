@@ -1,0 +1,125 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    line-height: 1.6;
+    padding: 20px;
+    max-width: 600px; /* Limit content width for readability */
+    margin: 40px auto; /* Center the content area with some top margin */
+    background-color: #f4f4f9; /* Light background for the page */
+    color: #333; /* Default text color */
+}
+
+h1, h2, h3 {
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    color: #1a1a1a; /* Darker heading color */
+}
+
+h1 {
+    text-align: center;
+    color: #4a4a4a;
+}
+
+input[type="email"],
+input[type="password"],
+textarea {
+    display: block;
+    margin-bottom: 15px; /* Increased spacing */
+    padding: 10px; /* Slightly larger padding */
+    width: calc(100% - 22px); /* Full width minus padding & border */
+    border: 1px solid #ccc;
+    border-radius: 4px; /* Slightly rounded corners */
+    font-size: 1rem;
+}
+
+textarea {
+    height: 80px; /* Slightly taller */
+    resize: vertical; /* Allow vertical resize only */
+}
+
+button {
+    display: block; /* Buttons take full width */
+    width: 100%; /* Make buttons consistent width */
+    margin-bottom: 15px; /* Increased spacing */
+    padding: 12px 20px; /* Generous padding */
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff; /* Primary button color */
+    color: white;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background-color 0.2s ease; /* Smooth hover effect */
+}
+
+button:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
+
+#logout-button {
+    background-color: #dc3545; /* Different color for logout/destructive actions */
+    margin-top: 20px; /* Extra space above logout */
+}
+
+#logout-button:hover {
+    background-color: #c82333; /* Darker red on hover */
+}
+
+ul#notes-list {
+    list-style: none; /* Remove default bullets */
+    padding-left: 0; /* Remove default padding */
+    margin-top: 10px;
+}
+
+ul#notes-list li {
+    background-color: #fff; /* White background for notes */
+    border: 1px solid #eee;
+    border-radius: 4px;
+    padding: 10px 15px;
+    margin-bottom: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* Subtle shadow */
+    word-wrap: break-word; /* Ensure long notes wrap */
+}
+
+#user-status {
+    text-align: center;
+    margin: 20px 0;
+    padding: 10px;
+    background-color: #e9ecef; /* Light grey background */
+    border-radius: 4px;
+}
+
+#user-email {
+    font-weight: bold;
+    color: #0056b3;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background-color: #ddd;
+    margin: 25px 0; /* Increased spacing around separators */
+}
+
+/* Style containers for better visual grouping */
+#auth-container, #notes-container {
+    background-color: #ffffff; /* White background for main areas */
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Slightly more pronounced shadow */
+    margin-bottom: 30px; /* Space below containers */
+}
+
+h3 { /* Specific styling for form headings */
+    text-align: center;
+    margin-bottom: 1.2em;
+    color: #333;
+}
+
+/* Initial states controlled by JS using style.display = 'none' or 'block',
+   but we ensure they don't have unwanted styles when visible. */
+#notes-container,
+#logout-button,
+#user-status {
+    /* These rely on JavaScript to set display: block or display: none */
+    /* No conflicting CSS here affecting display property */
+}
