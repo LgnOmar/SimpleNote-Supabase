@@ -133,6 +133,7 @@ async function handleSupabaseLogout() {
 
 
 
+
 // --- Auth State Change Listener ---
 supabase.auth.onAuthStateChange((_event, session) => {
     // _event gives info like 'SIGNED_IN', 'SIGNED_OUT', 'TOKEN_REFRESHED', etc.
@@ -200,3 +201,66 @@ supabase.auth.onAuthStateChange((_event, session) => {
         notesList.innerHTML = '';
     }
 });
+
+
+// --- Note Creation Logic ---
+addNoteButton.addEventListener('click', async (e) => {
+    e.preventDefault(); // Stop page reload
+    const noteText = noteInput.value.trim(); // Get text, remove leading/trailing spaces
+
+    // Get current user session to access user ID safely
+    const sessionResponse = await supabase.auth.getSession();
+    const user = sessionResponse.data.session?.user; // Access user object within session data
+
+    if (noteText && user) {
+        // If note has text and user is logged in, call the save function
+        console.log(`Attempting to add note for user: ${user.id}`);
+        await addSupabaseNote(user.id, noteText);
+    } else if (!user) {
+        // If user is not logged in
+        console.warn("Add Note attempt failed: User not logged in.");
+        alert("Hold on! You need to be logged in to save notes.");
+    } else {
+        // If note text is empty
+        console.warn("Add Note attempt failed: Note text is empty.");
+        alert("Whoops! Please type something in the note before saving.");
+    }
+});
+
+
+
+async function addSupabaseNote(userId, text) {
+    console.log(`addSupabaseNote called with userId: ${userId}, text: ${text.substring(0, 20)}...`); // Log input
+    try {
+        // Use the Supabase client to insert into the 'notes' table
+        const { data, error } = await supabase
+            .from('notes') // Specify the table name
+            .insert([ // Pass an array of objects (rows) to insert
+                {
+                    text: text,       // The note content
+                    user_id: userId   // The ID of the owner (MUST match logged-in user for RLS)
+                    // 'id' and 'created_at' are handled automatically by Postgres defaults
+                }
+            ]);
+            // We can add .select() here if we wanted the newly created row back, e.g. .insert([...]).select()
+
+        // Check if Supabase returned an error (e.g., RLS violation)
+        if (error) {
+            console.error("Supabase insert error details:", error);
+            throw error; // Rethrow the error to be caught by the catch block
+        }
+
+        // If successful (no error thrown)
+        console.log("Supabase note added successfully. Response data:", data); // Data is often null unless .select() used
+        noteInput.value = ''; // Clear the textarea input field
+
+        // Refresh the notes list on the page immediately
+        console.log("Refreshing notes list after adding new note.");
+        fetchAndDisplaySupabaseNotes(userId); // Trigger display update
+
+    } catch (error) {
+        // Catch any error thrown from the try block or by Supabase
+        console.error("Detailed Error Adding Supabase Note:", error);
+        alert("Couldn't save your note. Reason: " + error.message); // User feedback
+    }
+}
