@@ -8,7 +8,44 @@
 </head>
 <body>
     <h1>SimpleNote (Supabase)</h1>
+
+    <div id="auth-container">
+        <!-- container will go here -->
+         <div id="signup-form">
+            <h3>Sign Up</h3>
+            <input type="email" id="signup-email" placeholder="Enter Your Email">
+            <input type="password" id="signup-password" placeholder="Create a password">
+            <button id="signup-button">Sign Up</button>
+         </div>
+         <hr>
+         <div id="login-form">
+            <h3>Log In</h3>
+            <input type="email" id="login-email" placeholder="Enter your email">
+            <input type="password" id="login-password" placeholder="Enter your password">
+            <button id="login-button">Log In</button>
+        </div>
+        <hr> <!-- Visual separator line -->
+
+        <p id="user-status" style="display: none;">Logged in as: <span id="user-email"></span></p>
+        <button id="logout-button" style="display: none;"> Log Out</button>
+
+    </div>
     
+    <div id="notes-container" style="display: none;">
+        <h2>My Notes</h2>
+        
+        <div id="add-note-form">
+            <h3>Add a New Note</h3>
+            <textarea id="note-input" placeholder="Write your note here..."></textarea>
+            <button id="add-note-button">Save Note</button>
+        </div>
+
+        <h3>Saved Notes:</h3>
+        <ul id="notes-list">
+            <!-- Notes will be added here dynamically by JavaScript -->
+        </ul>
+    </div>
+
     <script type="module" src="script.js"></script>
 </body>
 </html>
