@@ -1,0 +1,12 @@
+# Ignore Node.js dependency folders (if we ever use npm)
+node_modules/
+
+# Ignore general OS files
+.DS_Store
+Thumbs.db
+
+# Ignore sensitive configuration files (though Supabase anon key is okay client-side)
+# Example: *.env
+
+# VS Code specific
+.vscode/
