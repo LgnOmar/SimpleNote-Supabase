@@ -144,27 +144,59 @@ supabase.auth.onAuthStateChange((_event, session) => {
     if (currentUser) {
         // User IS logged in
         console.log("User is logged IN:", currentUser);
-        // Update UI for logged-in state:
-        authContainer.style.display = 'none';    // Hide auth forms
-        notesContainer.style.display = 'block'; // Show notes area
-        logoutButton.style.display = 'block';   // Show logout button
-        userStatus.style.display = 'block';     // Show status message
-        userEmailSpan.textContent = currentUser.email; // Display user's email
 
-        // IMPORTANT: Fetch notes associated with this user
-        fetchAndDisplaySupabaseNotes(currentUser.id); // Pass the Supabase user ID (UUID)
+        // --- DEBUGGING LOGOUT BUTTON ---
+        console.log("Attempting to update UI for logged-in state...");
+        try {
+            console.log("1. Checking authContainer:", authContainer);
+            authContainer.style.display = 'none';
+
+            console.log("2. Checking notesContainer:", notesContainer);
+            notesContainer.style.display = 'block';
+
+            console.log("3. Checking logoutButton variable:", logoutButton); // Check if variable holds the element
+            if (logoutButton) {
+                logoutButton.style.display = 'block'; // Set display style
+                console.log("   Set logoutButton display to block.");
+            } else {
+                console.error("   logoutButton variable is NULL or undefined!"); // Big warning if element not found
+            }
+
+            console.log("4. Checking userStatus:", userStatus);
+            userStatus.style.display = 'block';
+
+            console.log("5. Checking userEmailSpan:", userEmailSpan);
+            userEmailSpan.textContent = currentUser.email;
+            console.log("   Set user email text.");
+
+        } catch (uiError) {
+            console.error("!!! ERROR during UI update !!!", uiError); // Catch any errors during UI manipulation
+        }
+        // --- END DEBUGGING ---
+
+
+        // Temporarily comment out the fetch call to avoid the known ReferenceError for now
+        // fetchAndDisplaySupabaseNotes(currentUser.id);
+        notesList.innerHTML = '<li>Notes would load here... (Function call commented out)</li>';
+
 
     } else {
-        // User IS logged OUT
+        // User IS logged OUT (Keep this logic as is)
         console.log("User is logged OUT");
-        // Update UI for logged-out state:
-        authContainer.style.display = 'block';  // Show auth forms
-        notesContainer.style.display = 'none';  // Hide notes area
-        logoutButton.style.display = 'none';    // Hide logout button
-        userStatus.style.display = 'none';      // Hide status message
-        userEmailSpan.textContent = '';         // Clear email display
-
-        // Clear any previously shown notes
-        notesList.innerHTML = ''; // Remove all items from the notes list
+        authContainer.style.display = 'block';
+        notesContainer.style.display = 'none';
+        // IMPORTANT: Ensure logoutButton variable exists before trying to set its style
+        if(logoutButton) {
+           logoutButton.style.display = 'none';
+        } else {
+           console.error("Cannot hide logoutButton on logout - variable is null!");
+        }
+        if(userStatus) {
+            userStatus.style.display = 'none';
+        }
+         if(userEmailSpan){
+             userEmailSpan.textContent = '';
+         }
+        notesList.innerHTML = '';
     }
 });
