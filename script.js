@@ -9,3 +9,162 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 console.log("Supabase Initialized!", supabase); // Verify client object creation
+
+// --- DOM Element References ---
+const signupForm = document.getElementById('signup-form');
+const signupEmailInput = document.getElementById('signup-email');
+const signupPasswordInput = document.getElementById('signup-password');
+const signupButton = document.getElementById('signup-button');
+
+const loginForm = document.getElementById('login-form');
+const loginEmailInput = document.getElementById('login-email');
+const loginPasswordInput = document.getElementById('login-password');
+const loginButton = document.getElementById('login-button');
+
+const logoutButton = document.getElementById('logout-button');
+const userStatus = document.getElementById('user-status');
+const userEmailSpan = document.getElementById('user-email');
+
+const notesContainer = document.getElementById('notes-container');
+const authContainer = document.getElementById('auth-container');
+
+const addNoteForm = document.getElementById('add-note-form');
+const noteInput = document.getElementById('note-input');
+const addNoteButton = document.getElementById('add-note-button');
+const notesList = document.getElementById('notes-list');
+
+console.log("DOM elements referenced."); // Optional confirmation
+      
+
+    // --- Signup Logic ---
+    signupButton.addEventListener('click', async (e) => {
+    e.preventDefault(); // Prevent default form submission (page reload)
+    const emailValue = signupEmailInput.value;
+    const passwordValue = signupPasswordInput.value;
+    await handleSupabaseSignup(emailValue, passwordValue);
+});
+
+    
+async function handleSupabaseSignup(email, password) {
+    try {
+        // Use Supabase Auth SDK to sign up
+        const { data, error } = await supabase.auth.signUp({
+            email: email,
+            password: password,
+        });
+
+        if (error) {
+            // If Supabase returns an error object, throw it
+            throw error;
+        }
+
+        console.log("Supabase signup initiated successfully:", data);
+        // Alert user about potential email confirmation step
+        alert("Signup successful! Please check your email inbox (and maybe spam folder) to confirm your account registration.");
+
+        // Clear the form fields after successful initiation
+        signupEmailInput.value = '';
+        signupPasswordInput.value = '';
+
+    } catch (error) {
+        // Catch any thrown errors (from Supabase or elsewhere)
+        console.error("Supabase Signup Error:", error.message);
+        alert("Signup Failed: " + error.message); // Show feedback to user
+    }
+}
+
+
+// --- Login Logic ---
+loginButton.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const emailValue = loginEmailInput.value;
+    const passwordValue = loginPasswordInput.value;
+    await handleSupabaseLogin(emailValue, passwordValue);
+});
+
+async function handleSupabaseLogin(email, password) {
+    try {
+        // Use Supabase Auth SDK to sign in
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: email,
+            password: password,
+        });
+
+        if (error) {
+            throw error;
+        }
+
+        console.log("Supabase login successful:", data.user);
+        // Clear the form fields
+        loginEmailInput.value = '';
+        loginPasswordInput.value = '';
+        // Note: UI changes based on login state are handled by onAuthStateChange
+
+    } catch (error) {
+        console.error("Supabase Login Error:", error.message);
+        alert("Login Failed: " + error.message);
+    }
+}
+
+
+
+ // --- Logout Logic ---
+ logoutButton.addEventListener('click', async () => {
+    await handleSupabaseLogout();
+});
+
+async function handleSupabaseLogout() {
+    try {
+        // Use Supabase Auth SDK to sign out
+        const { error } = await supabase.auth.signOut();
+
+        if (error) {
+            throw error;
+        }
+
+        console.log("Supabase logged out successfully");
+        // UI changes handled by onAuthStateChange
+
+    } catch (error) {
+        console.error("Supabase Logout Error:", error.message);
+        alert("Logout Failed: " + error.message);
+    }
+}
+
+
+
+// --- Auth State Change Listener ---
+supabase.auth.onAuthStateChange((_event, session) => {
+    // _event gives info like 'SIGNED_IN', 'SIGNED_OUT', 'TOKEN_REFRESHED', etc.
+    // session object contains user details if logged in, null otherwise.
+    console.log(`Supabase Auth State Change Event: ${_event}`, session);
+
+    const currentUser = session?.user; // Get user object from session, null if not logged in
+
+    if (currentUser) {
+        // User IS logged in
+        console.log("User is logged IN:", currentUser);
+        // Update UI for logged-in state:
+        authContainer.style.display = 'none';    // Hide auth forms
+        notesContainer.style.display = 'block'; // Show notes area
+        logoutButton.style.display = 'block';   // Show logout button
+        userStatus.style.display = 'block';     // Show status message
+        userEmailSpan.textContent = currentUser.email; // Display user's email
+
+        // IMPORTANT: Fetch notes associated with this user
+        fetchAndDisplaySupabaseNotes(currentUser.id); // Pass the Supabase user ID (UUID)
+
+    } else {
+        // User IS logged OUT
+        console.log("User is logged OUT");
+        // Update UI for logged-out state:
+        authContainer.style.display = 'block';  // Show auth forms
+        notesContainer.style.display = 'none';  // Hide notes area
+        logoutButton.style.display = 'none';    // Hide logout button
+        userStatus.style.display = 'none';      // Hide status message
+        userEmailSpan.textContent = '';         // Clear email display
+
+        // Clear any previously shown notes
+        notesList.innerHTML = ''; // Remove all items from the notes list
+    }
+});
