@@ -264,3 +264,68 @@ async function addSupabaseNote(userId, text) {
         alert("Couldn't save your note. Reason: " + error.message); // User feedback
     }
 }
+
+
+
+
+    // --- Note Fetching and Display Logic ---
+async function fetchAndDisplaySupabaseNotes(userId) {
+    // Ensure we have a userId before proceeding
+    if (!userId) {
+        console.warn("fetchAndDisplaySupabaseNotes called without a userId.");
+        notesList.innerHTML = '<li>Login required to view notes.</li>'; // Clear/update list
+        return; // Stop execution if no user ID
+    }
+
+    console.log(`Fetching notes from Supabase for user: ${userId}`);
+    notesList.innerHTML = ''; // Clear the list before adding new items
+
+    try {
+        // Database query will go here...
+        // Processing results will go here...
+        // Handling empty results will go here...
+
+        // Use the Supabase client to query the 'notes' table
+        const { data: fetchedNotes, error } = await supabase
+            .from('notes') // Target the table
+            .select('*')   // Select all columns (*)
+            .eq('user_id', userId); // Filter rows where user_id column equals the provided userId
+              // Check if the query itself resulted in an error
+            if (error) {
+                console.error("Supabase fetch error details:", error);
+                throw error; // Throw error to be caught by the outer catch block
+            }
+    
+    } catch (error) {
+        // Error handling will go here...
+        console.error('Detailed Error Fetching Supabase Notes:', error);
+        alert("Could not fetch your notes. Reason: " + error.message);
+        notesList.innerHTML = '<li>Sorry, could not load notes.</li>';
+    }
+}
+    
+
+
+
+// Log the fetched data for debugging
+console.log("Successfully fetched Supabase notes:", fetchedNotes);
+
+// Check if any notes were actually returned
+if (fetchedNotes && fetchedNotes.length > 0) {
+    // If notes exist, loop through them and display each one
+    fetchedNotes.forEach(note => {
+        const li = document.createElement('li'); // Create a new list item element
+        li.textContent = note.text;             // Set its text content to the note's text
+        // Optional: Add timestamp display
+        // if (note.created_at) {
+        //    li.textContent += ` (Saved: ${new Date(note.created_at).toLocaleString()})`;
+        // }
+        notesList.appendChild(li); // Add the new list item to the UL on the page
+    });
+} else {
+    // If no notes were found for this user
+    console.log("No Supabase notes found for this user.");
+    const li = document.createElement('li');
+    li.textContent = "You haven't saved any notes yet. Add one!";
+    notesList.appendChild(li); // Add the 'no notes' message to the list
+}
