@@ -1,0 +1,106 @@
+@startuml JibJob Database Schema
+
+' Setting theme and layout hints
+skinparam linetype ortho
+skinparam handwritten false
+skinparam shadowing false
+skinparam PKAlias primary_key
+skinparam FKAlias foreign_key
+
+' Define Entities (Tables)
+
+entity "Users" as users {
+  + **id:** uuid <<primary_key>> <<generated>>
+  --
+  + email: text <<unique>> <<not null>>
+  + full_name: text
+  + phone_number: text <<unique>>
+  + location_text: text ' Simple text field for location MVP (e.g., "City, Area")
+  ' + location_geo: point ' Future: For geographic queries (lat/lng)
+  + profile_picture_url: text
+  + bio: text
+  + created_at: timestamp <<default now()>>
+  ' Add Supabase Auth User ID link if using built-in Auth
+  + auth_user_id: uuid <<unique>> <<foreign_key>> ' Links to supabase.auth.users.id
+}
+
+entity "Gigs" as gigs {
+  + **id:** uuid <<primary_key>> <<generated>>
+  --
+  + posted_by_user_id: uuid <<foreign_key>> ' Who created the gig
+  + title: text <<not null>>
+  + description: text <<not null>>
+  + category: text ' e.g., "Moving", "Plumbing", "Event Help"
+  + location_text: text <<not null>> ' Address or area
+  ' + location_geo: point ' Future: For map integration
+  + proposed_price: decimal ' Optional: Initial price suggestion
+  + status: text <<default 'open'>> ' open, assigned, completed, cancelled
+  + created_at: timestamp <<default now()>>
+  + updated_at: timestamp <<default now()>>
+  + gig_datetime: timestamp ' When the gig needs to happen
+  + assigned_to_user_id: uuid <<foreign_key>> <<nullable>> ' Who got the gig
+}
+
+entity "Skills" as skills {
+  + **id:** serial <<primary_key>> <<generated>> ' Simple integer ID is fine here
+  --
+  + skill_name: text <<unique>> <<not null>> ' e.g., "Plumbing", "Heavy Lifting", "Driving License B"
+}
+
+entity "UserSkills" as user_skills {
+  ' This is a join table for Many-to-Many relationship
+  + **user_id:** uuid <<foreign_key>>
+  + **skill_id:** integer <<foreign_key>>
+  --
+  primary key (user_id, skill_id) ' Composite Primary Key
+}
+
+entity "Applications" as applications {
+  + **id:** uuid <<primary_key>> <<generated>>
+  --
+  + gig_id: uuid <<foreign_key>> ' Which gig is this application for
+  + applicant_user_id: uuid <<foreign_key>> ' Who is applying
+  + proposed_price: decimal ' Worker's proposed price/bid
+  + message: text ' Cover letter or message
+  + status: text <<default 'pending'>> ' pending, accepted, rejected
+  + created_at: timestamp <<default now()>>
+}
+
+entity "Reviews" as reviews {
+ + **id:** uuid <<primary_key>> <<generated>>
+ --
+ + gig_id: uuid <<foreign_key>> <<unique>> ' One review per completed gig
+ + reviewer_user_id: uuid <<foreign_key>> ' User giving the review
+ + reviewed_user_id: uuid <<foreign_key>> ' User being reviewed
+ + rating: integer ' e.g., 1 to 5 stars
+ + comment: text
+ + created_at: timestamp <<default now()>>
+ + review_type: text ' 'worker_review' or 'provider_review'
+}
+
+' Define Relationships
+' User relationships
+users "1" -- "0..*" gigs : posts                        ' One User posts zero or many Gigs
+users "1" -- "0..*" applications : applies_for           ' One User makes zero or many Applications
+users "1" -- "0..*" reviews : gives                     ' One User gives zero or many Reviews
+users "1" -- "0..*" reviews : receives                  ' One User receives zero or many Reviews
+users "1" -- "0..*" user_skills : has                   ' One User has zero or many Skills
+
+' Gig relationships
+gigs "1" -- "0..*" applications : receives_applications ' One Gig receives zero or many Applications
+gigs "1" -- "0..1" users : assigned_to                 ' One Gig is assigned to zero or one User (worker)
+gigs "1" -- "0..1" reviews : has_review                 ' One Gig can have one review (could be two if both sides review)
+
+' Application relationships
+applications "1" -- "1" users : submitted_by             ' Each Application submitted by exactly one User
+applications "1" -- "1" gigs : for_gig                 ' Each Application is for exactly one Gig
+
+' Skill relationships
+skills "1" -- "0..*" user_skills : associated_with       ' One Skill is associated with zero or many UserSkills entries
+
+' UserSkills relationships (Join Table)
+user_skills "1" -- "1" users : maps_user                 ' UserSkills connects one User
+user_skills "1" -- "1" skills : maps_skill                ' UserSkills connects one Skill
+
+
+@enduml
